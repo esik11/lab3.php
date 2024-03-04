@@ -8,16 +8,16 @@ use PHPMailer\PHPMailer\Exception;
 
 require 'vendor/autoload.php';
 
-function sendemail_verify($username, $emailaddress)
+function sendemail_verify($username, $emailaddress, $verify_token)
 {
     $mail = new PHPMailer(true);
-
+    $mail ->SMTPDebug = SMTP ::DEBUG_SERVER;
     $mail->isSMTP();
     $mail->SMTPAuth = true;
 
-    $mail->Host = "smtp.gmail.com";
-    $mail->Username = "jeorgeandreielevencionado@gmail.com";
-    $mail->Password = "jeorgeandrei679";
+    $mail->Host ="smtp.gmail.com";
+    $mail->Username ="jeorgeandreielevencionado@gmail.com";
+    $mail->Password ="dbzb xhbk font iqpo";
 
     $mail->SMTPSecure = "tls";
     $mail->Port = 587;
@@ -25,13 +25,13 @@ function sendemail_verify($username, $emailaddress)
     $mail->setFrom("jeorgeandreielevencionado@gmail.com", $username);
     $mail->addAddress($emailaddress);
     $mail->isHTML(true);
-    $mail->Subject = "Email Verification";
+    $mail->Subject ="Email Verification";
     
-    $email_template  = "<h2>You have Registered Successfully</h2>"
+    $email_template="<h2>You have Registered Successfully</h2>"
                      . "<h5>Verify your email address to login</h5>"
                      . "<br/><br/>"
-                     . "<a href='http://localhost/lab3.php/verify-email.php'>Verify Email</a>";
-    $mail->Body = $email_template;
+                     . "<a href='http://localhost/lab3.php/verify-email.php?token=$verify_token'>Verify Email</a>";
+    $mail->Body =$email_template;
     
     if ($mail->send()) {
         echo "Message has been sent";
@@ -56,11 +56,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate and sanitize input
     $username = validate($_POST['username']);
     $password = validate($_POST['password']);
-    $emailaddress = validate ($_POST['email']);
+    $emailaddress = validate ($_POST['emailaddress']);
     $first_name = validate ($_POST ['firstname']);
     $middle_name = validate ($_POST ['middlename']);
     $last_name = validate ($_POST ['lastname']);
-    
+    $verify_token = md5(rand());
+
     $emailaddress = strtolower(validate($_POST['emailaddress']));
 
     // Check if email already exists
@@ -78,11 +79,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: signup.php?error=Username, Password and Email Address are required");
         exit();
     } else {
-        $sql = "INSERT INTO users (username, password, first_name, middle_name, last_name, email) VALUES ('$username', '$password' , '$first_name' ,'$middle_name', '$last_name', '$emailaddress' )";
+        $sql = "INSERT INTO users (username, password, first_name, middle_name, last_name, email, verify_token) VALUES ('$username', '$password' , '$first_name' ,'$middle_name', '$last_name', '$emailaddress', '$verify_token' )";
 
         if (mysqli_query($conn, $sql)) {
 
-            sendemail_verify("$username", "$emailaddress");
+            sendemail_verify("$username", "$emailaddress", "$verify_token");
             header("Location: loginform.php?success=User registered successfully");
             exit();
         } else {
