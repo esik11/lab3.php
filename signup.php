@@ -20,15 +20,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate and sanitize input fields
     $username = validate($_POST['username']);
     $password = validate($_POST['password']);
+    $confirm_password = validate($_POST['confirm_password']);
     $emailaddress = validate($_POST['emailaddress']);
     $firstname = validate($_POST['firstname']);
     $middlename = validate($_POST['middlename']);
     $lastname = validate($_POST['lastname']);
     $gmail_password = validate($_POST['gmail_password']);
 
+
+    if ($password !== $confirm_password) {
+        $_SESSION['status'] = "Passwords do not match.";
+        header("Location: signup.php");
+        exit();
+    }
+
     // Check if any field is empty
-    if (empty($username) || empty($password) || empty($emailaddress) || empty($firstname) || empty($middlename) || empty($lastname) || empty($gmail_password)) {
+    if (empty($username) || empty($password) || empty($confirm_password) || empty($emailaddress) || empty($firstname) || empty($middlename) || empty($lastname) || empty($gmail_password)) {
         $_SESSION['status'] = "All fields are required.";
+        $_SESSION['username'] = $username;
+        $_SESSION['emailaddress'] = $emailaddress;
+        $_SESSION['firstname'] = $firstname;
+        $_SESSION['middlename'] = $middlename;
+        $_SESSION['lastname'] = $lastname;
+        header("Location: signup.php");
+        exit();
+    } elseif ($password !== $confirm_password) {
+        $_SESSION['status'] = "Passwords do not match.";
+        $_SESSION['username'] = $username;
+        $_SESSION['emailaddress'] = $emailaddress;
+        $_SESSION['firstname'] = $firstname;
+        $_SESSION['middlename'] = $middlename;
+        $_SESSION['lastname'] = $lastname;
         header("Location: signup.php");
         exit();
     } else {
@@ -146,40 +168,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container-box">
         <h2>Signup</h2>
         <?php if (isset($_SESSION['status'])) { ?>
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-danger" role="alert">
                 <?php echo $_SESSION['status']; ?>
             </div>
             <?php unset($_SESSION['status']); ?>
         <?php } ?>
         <form action="signup.php" method="post">
-            <?php if (isset($_GET['error'])) { ?>
-                <div class="alert alert-danger" role="alert">
-                    <?php echo $_GET['error']; ?>
-                </div>
-            <?php } ?>
             <div class="form-group">
                 <label for="firstname">First Name</label>
-                <input type="text" class="form-control" id="firstname" name="firstname" placeholder="First Name">
+                <input type="text" class="form-control" id="firstname" name="firstname" placeholder="First Name" value="<?php echo isset($_SESSION['firstname']) ? $_SESSION['firstname'] : ''; ?>">
             </div>
             <div class="form-group">
                 <label for="middlename">Middle Name</label>
-                <input type="text" class="form-control" id="middlename" name="middlename" placeholder="Middle Name">
+                <input type="text" class="form-control" id="middlename" name="middlename" placeholder="Middle Name" value="<?php echo isset($_SESSION['middlename']) ? $_SESSION['middlename'] : ''; ?>">
             </div>
             <div class="form-group">
                 <label for="lastname">Last Name</label>
-                <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Last Name">
+                <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Last Name" value="<?php echo isset($_SESSION['lastname']) ? $_SESSION['lastname'] : ''; ?>">
             </div>
             <div class="form-group">
                 <label for="username">User Name</label>
-                <input type="text" class="form-control" id="username" name="username" placeholder="User Name">
+                <input type="text" class="form-control" id="username" name="username" placeholder="User Name" value="<?php echo isset($_SESSION['username']) ? $_SESSION['username'] : ''; ?>">
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" class="form-control" id="password" name="password" placeholder="Password">
             </div>
             <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm Password">
+            </div>
+            <div class="form-group">
                 <label for="emailaddress">Email Address</label>
-                <input type="email" class="form-control" id="emailaddress" name="emailaddress" placeholder="Email Address">
+                <input type="email" class="form-control" id="emailaddress" name="emailaddress" placeholder="Email Address" value="<?php echo isset($_SESSION['emailaddress']) ? $_SESSION['emailaddress'] : ''; ?>">
             </div>
             <div class="form-group">
                 <label for="gmail_password">Email Password</label>
