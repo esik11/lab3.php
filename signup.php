@@ -1,20 +1,23 @@
 <?php
-session_start();
-include "db_conn.php";
+session_start(); // Start the session to manage user data
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
+include "db_conn.php"; // Include the database connection file
 
-require 'vendor/autoload.php';
+use PHPMailer\PHPMailer\PHPMailer; // Import PHPMailer class
+use PHPMailer\PHPMailer\SMTP; // Import PHPMailer SMTP class
+use PHPMailer\PHPMailer\Exception; // Import PHPMailer Exception class
 
+require 'vendor/autoload.php'; // Require autoload file to load PHPMailer library
+
+// Check if the request method is POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Function to validate and sanitize input data
     function validate($data)
     {
-        $data = trim($data);
-        $data = stripslashes($data);
-        $data = htmlspecialchars($data);
-        return $data;
+        $data = trim($data); // Remove whitespace from the beginning and end of the string
+        $data = stripslashes($data); // Remove backslashes (\)
+        $data = htmlspecialchars($data); // Convert special characters to HTML entities
+        return $data; // Return the sanitized data
     }
 
     // Validate and sanitize input fields
@@ -27,48 +30,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $lastname = validate($_POST['lastname']);
     $gmail_password = validate($_POST['gmail_password']);
 
-
+    // Checking if passwords match
     if ($password !== $confirm_password) {
-        $_SESSION['status'] = "Passwords do not match.";
-        header("Location: signup.php");
-        exit();
+        $_SESSION['status'] = "Passwords do not match."; // Set session status message
+        header("Location: signup.php"); // Redirect back to signup page
+        exit(); // Terminate script execution
     }
 
-    // Check if any field is empty
+    // check if any field is empty
     if (empty($username) || empty($password) || empty($confirm_password) || empty($emailaddress) || empty($firstname) || empty($middlename) || empty($lastname) || empty($gmail_password)) {
-        $_SESSION['status'] = "All fields are required.";
+        $_SESSION['status'] = "All fields are required."; // Set session status message
         $_SESSION['username'] = $username;
         $_SESSION['emailaddress'] = $emailaddress;
         $_SESSION['firstname'] = $firstname;
         $_SESSION['middlename'] = $middlename;
         $_SESSION['lastname'] = $lastname;
-        header("Location: signup.php");
-        exit();
-    } elseif ($password !== $confirm_password) {
-        $_SESSION['status'] = "Passwords do not match.";
+        header("Location: signup.php"); //redirect back to signup page
+        exit(); //terminate script execution
+    } elseif ($password !== $confirm_password) { //check again for passwords match
+        $_SESSION['status'] = "Passwords do not match."; //et session status message
         $_SESSION['username'] = $username;
         $_SESSION['emailaddress'] = $emailaddress;
         $_SESSION['firstname'] = $firstname;
         $_SESSION['middlename'] = $middlename;
         $_SESSION['lastname'] = $lastname;
-        header("Location: signup.php");
-        exit();
+        header("Location: signup.php"); //redirect back to signup page
+        exit(); //terminate script execution
     } else {
-        // Proceed with database operations
-        $verify_token = md5(rand());
+        // database operations
+        $verify_token = md5(rand()); // Generate a verification token
 
-        // Store email address or username in the 'email' field of the database
-        // Since you want to use the email address as the email username, you can directly use it
+        // Storing email address or username in the 'email' field of the database
         $email_to_store = $emailaddress;
 
-        // Check if the email address already exists
+        // check if the email address already exists in the database
         $check_email_query = "SELECT email FROM users WHERE LOWER(email) = LOWER('$email_to_store') LIMIT 1";
         $check_email_query_run = mysqli_query($conn, $check_email_query);
 
         if (mysqli_num_rows($check_email_query_run) > 0) {
-            $_SESSION['status'] = "Email ID already exists. Please use another email address.";
-            header("Location: signup.php");
-            exit();
+            $_SESSION['status'] = "Email ID already exists. Please use another email address."; // Set session status message
+            header("Location: signup.php"); // Redirect back to signup page
+            exit(); // Terminate script execution
         }
 
         // Insert user data into the database
@@ -77,7 +79,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (mysqli_query($conn, $sql)) {
             // Registration successful message
-            $_SESSION['status'] = "Registration successful. Please verify your email.";
+            $_SESSION['status'] = "Registration successful. Please verify your email."; // Set session status message
+            
             // Perform email sending here
             // Configure PHPMailer instance and send verification email
             $mail = new PHPMailer(true);
@@ -103,20 +106,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 $mail->send();
             } catch (Exception $e) {
-                $_SESSION['status'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                header("Location: signup.php");
-                exit();
+                $_SESSION['status'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}"; // Set session status message
+                header("Location: signup.php"); // Redirect back to signup page
+                exit(); // Terminate script execution
             }
-            header("Location: signup.php");
-            exit();
+            header("Location: signup.php"); // Redirect back to signup page
+            exit(); // Terminate script execution
         } else {
-            $_SESSION['status'] = "Error occurred while registering user.";
-            header("Location: signup.php");
-            exit();
+            $_SESSION['status'] = "Error occurred while registering user."; // Set session status message
+            header("Location: signup.php"); // Redirect back to signup page
+            exit(); // Terminate script execution
         }
     }
 }
 ?>
+
 
 
 
