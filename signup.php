@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: signup.php"); //redirect back to signup page
         exit(); //terminate script execution
     } elseif ($password !== $confirm_password) { //check again for passwords match
-        $_SESSION['status'] = "Passwords do not match."; //et session status message
+        $_SESSION['status'] = "Passwords do not match."; //set session status message
         $_SESSION['username'] = $username;
         $_SESSION['emailaddress'] = $emailaddress;
         $_SESSION['firstname'] = $firstname;
@@ -56,7 +56,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['lastname'] = $lastname;
         header("Location: signup.php"); //redirect back to signup page
         exit(); //terminate script execution
-    } else {
+    }elseif ($firstname === $middlename || $middlename === $lastname || $firstname === $lastname) {
+        $_SESSION['status'] = "First name, middle name, and last name cannot be the same."; // Set session status message
+        $_SESSION['username'] = $username;
+        $_SESSION['emailaddress'] = $emailaddress;
+        $_SESSION['firstname'] = $firstname;
+        $_SESSION['middlename'] = $middlename;
+        $_SESSION['lastname'] = $lastname;
+        header("Location: signup.php"); // Redirect back to signup page
+        exit(); // Terminate script execution
+    } 
+    else {
         // database operations
         $verify_token = md5(rand()); // Generate a verification token
 
@@ -217,3 +227,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </body>
 
 </html>
+
